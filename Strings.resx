@@ -126,6 +126,12 @@
   <data name="Setting_DefaultMountChoice" xml:space="preserve">
     <value>Default Mount Choice</value>
   </data>
+  <data name="Setting_DefaultSecondaryRadialBinding" xml:space="preserve">
+    <value>2nd Radial</value>
+  </data>
+  <data name="Setting_DefaultTertiaryRadialBinding" xml:space="preserve">
+    <value>3rd Radial</value>
+  </data>
   <data name="Setting_DefaultWaterMountChoice" xml:space="preserve">
     <value>Default Water Mount Choice</value>
   </data>

@@ -40,7 +40,9 @@ namespace Manlaan.Mounts.Controls
 
         private Point SpawnPoint = default;
 
-        public DrawRadial(Helper helper, TextureCache textureCache)
+        private readonly Mount.RadialCategoryEnum _radialCategory;
+
+        public DrawRadial(Helper helper, TextureCache textureCache, Mount.RadialCategoryEnum radialCategory)
         {
             Visible = false;
             Padding = Thickness.Zero;
@@ -48,6 +50,7 @@ namespace Manlaan.Mounts.Controls
             _textureCache = textureCache;
             Shown += async (sender, e) => await HandleShown(sender, e);
             Hidden += async (sender, e) => await HandleHidden(sender, e);
+            _radialCategory = radialCategory;
         }
 
         protected override CaptureType CapturesInput()
@@ -57,10 +60,24 @@ namespace Manlaan.Mounts.Controls
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds) {
             RadialMounts.Clear();
-            var mounts = Module._availableOrderedMounts;
+
+            List<Mount> mounts;
+            switch (_radialCategory)
+            {
+                case Mount.RadialCategoryEnum.Secondary:
+                    mounts = Module._availableOrderedSecondaryMounts;
+                    break;
+                case Mount.RadialCategoryEnum.Tertiary:
+                    mounts = Module._availableOrderedTertiaryMounts;
+                    break;
+                default:
+                case Mount.RadialCategoryEnum.Primary:
+                    mounts = Module._availableOrderedMounts;
+                    break;
+            }
 
             Mount mountToPutInCenter = _helper.GetCenterMount();
-            if (mountToPutInCenter != null && mountToPutInCenter.IsAvailable)
+            if (_radialCategory == Mount.RadialCategoryEnum.Primary && mountToPutInCenter != null && mountToPutInCenter.IsAvailable) //  && showAlternativeRadial == false
             {
                 if (Module._settingMountRadialRemoveCenterMount.Value)
                 {

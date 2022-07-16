@@ -18,11 +18,9 @@ using Manlaan.Mounts.Controls;
 using System.Collections.Generic;
 using Gw2Sharp.Models;
 
-namespace Manlaan.Mounts
-{
+namespace Manlaan.Mounts {
     [Export(typeof(Blish_HUD.Modules.Module))]
-    public class Module : Blish_HUD.Modules.Module
-    {
+    public class Module : Blish_HUD.Modules.Module {
         private static readonly Logger Logger = Logger.GetLogger<Module>();
 
         #region Service Managers
@@ -33,9 +31,11 @@ namespace Manlaan.Mounts
         #endregion
 
         internal static Collection<Mount> _mounts;
-        internal static List<Mount> _availableOrderedMounts => _mounts.Where(m => m.IsAvailable).OrderBy(m => m.OrderSetting.Value).ToList();
+        internal static List<Mount> _availableOrderedMounts => _mounts.Where(m => m.IsAvailable && m.RadialCategory.Value == (int)Mount.RadialCategoryEnum.Primary).OrderBy(m => m.OrderSetting.Value).ToList();
+        internal static List<Mount> _availableOrderedSecondaryMounts => _mounts.Where(m => m.IsAvailable && m.RadialCategory.Value == (int)Mount.RadialCategoryEnum.Secondary).OrderBy(m => m.OrderSetting.Value).ToList();
+        internal static List<Mount> _availableOrderedTertiaryMounts => _mounts.Where(m => m.IsAvailable && m.RadialCategory.Value == (int)Mount.RadialCategoryEnum.Tertiary).OrderBy(m => m.OrderSetting.Value).ToList();
 
-        public static int[] _mountOrder = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        public static int[] _mountOrder = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
         public static string[] _mountDisplay = new string[] { "Transparent", "Solid", "SolidText" };
         public static string[] _mountBehaviour = new string[] { "DefaultMount", "Radial" };
         public static string[] _mountOrientation = new string[] { "Horizontal", "Vertical" };
@@ -44,6 +44,8 @@ namespace Manlaan.Mounts
         public static SettingEntry<string> _settingDefaultMountChoice;
         public static SettingEntry<string> _settingDefaultWaterMountChoice;
         public static SettingEntry<KeyBinding> _settingDefaultMountBinding;
+        public static SettingEntry<KeyBinding> _settingDefaultSecondaryRadialBinding;
+        public static SettingEntry<KeyBinding> _settingDefaultTertiaryRadialBinding;
         public static SettingEntry<bool> _settingDisplayMountQueueing;
         public static SettingEntry<string> _settingDefaultMountBehaviour;
         public static SettingEntry<bool> _settingMountRadialSpawnAtMouse;
@@ -69,6 +71,8 @@ namespace Manlaan.Mounts
 #pragma warning restore CS0618 // Type or member is obsolete
         private Panel _mountPanel;
         private DrawRadial _radial;
+        private DrawRadial _secondaryRadial;
+        private DrawRadial _tertiaryRadial;
         private LoadingSpinner _queueingSpinner;
         private Helper _helper;
         private TextureCache _textureCache;
@@ -131,12 +135,29 @@ namespace Manlaan.Mounts
                 new RollerBeetle(settings, _helper),
                 new Warclaw(settings, _helper),
                 new Skyscale(settings, _helper),
-                new SiegeTurtle(settings, _helper)
+                new SiegeTurtle(settings, _helper),
+                new Skiff(settings, _helper),
+                new FishingRod(settings, _helper),
+                new PersonalWaypoint(settings, _helper),
+                new Chair(settings, _helper)
             };
 
             _settingDefaultMountBinding = settings.DefineSetting("DefaultMountBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultMountBinding, () => "");
             _settingDefaultMountBinding.Value.Enabled = true;
-            _settingDefaultMountBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(); };
+            _settingDefaultMountBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(Mount.RadialCategoryEnum.Primary); };
+
+            _settingDefaultSecondaryRadialBinding = settings.DefineSetting("DefaultSecondaryRadialBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultSecondaryRadialBinding, () => "");
+            _settingDefaultSecondaryRadialBinding.Value.Enabled = true;
+            _settingDefaultSecondaryRadialBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(Mount.RadialCategoryEnum.Secondary); };
+
+            _settingDefaultTertiaryRadialBinding = settings.DefineSetting("DefaultTertiaryRadialBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultTertiaryRadialBinding, () => "");
+            _settingDefaultTertiaryRadialBinding.Value.Enabled = true;
+            _settingDefaultTertiaryRadialBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(Mount.RadialCategoryEnum.Tertiary); };
+
+            //_settingDefaultAlternativeBinding = settings.DefineSetting("DefaultAlternativeBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultAlternativeBinding, () => "");
+            //_settingDefaultAlternativeBinding.Value.Enabled = true;
+            //_settingDefaultAlternativeBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(Mount.RadialCategoryEnum.Alternatives); };
+
             _settingDefaultMountChoice = settings.DefineSetting("DefaultMountChoice", "Disabled", () => Strings.Setting_DefaultMountChoice, () => "");
             _settingDefaultWaterMountChoice = settings.DefineSetting("DefaultWaterMountChoice", "Disabled", () => Strings.Setting_DefaultWaterMountChoice, () => "");
             _settingDefaultMountBehaviour = settings.DefineSetting("DefaultMountBehaviour", "Radial", () => Strings.Setting_DefaultMountBehaviour, () => "");
@@ -230,14 +251,22 @@ namespace Manlaan.Mounts
                 }
             }
 
-            if(_settingDisplayMountQueueing.Value && _mounts.Any(m => m.QueuedTimestamp != null))
+            if (_settingDisplayMountQueueing.Value && _mounts.Any(m => m.QueuedTimestamp != null))
             {
                 _queueingSpinner?.Show();
             }
 
-            if(_radial.Visible && !_settingDefaultMountBinding.Value.IsTriggering)
+            if (_radial.Visible && !_settingDefaultMountBinding.Value.IsTriggering)
             {
                 _radial.Hide();
+            }
+            if (_secondaryRadial.Visible && !_settingDefaultSecondaryRadialBinding.Value.IsTriggering)
+            {
+                _secondaryRadial.Hide();
+            }
+            if (_tertiaryRadial.Visible && !_settingDefaultTertiaryRadialBinding.Value.IsTriggering)
+            {
+                _tertiaryRadial.Hide();
             }
         }
 
@@ -246,6 +275,8 @@ namespace Manlaan.Mounts
         {
             _mountPanel?.Dispose();
             _radial?.Dispose();
+            _secondaryRadial?.Dispose();
+            _tertiaryRadial?.Dispose();
 
             foreach (Mount m in _mounts)
             {
@@ -273,20 +304,24 @@ namespace Manlaan.Mounts
             _settingDrag.SettingChanged -= UpdateSettings;
             _settingImgWidth.SettingChanged -= UpdateSettings;
             _settingOpacity.SettingChanged -= UpdateSettings;
-            
+
             GameService.Overlay.BlishHudWindow.RemoveTab(windowTab);
         }
 
-        private void UpdateSettings(object sender = null, ValueChangedEventArgs<string> e = null) {
+        private void UpdateSettings(object sender = null, ValueChangedEventArgs<string> e = null)
+        {
             DrawUI();
         }
-        private void UpdateSettings(object sender = null, ValueChangedEventArgs<KeyBinding> e = null) {
+        private void UpdateSettings(object sender = null, ValueChangedEventArgs<KeyBinding> e = null)
+        {
             DrawUI();
         }
-        private void UpdateSettings(object sender = null, ValueChangedEventArgs<Point> e = null) {
+        private void UpdateSettings(object sender = null, ValueChangedEventArgs<Point> e = null)
+        {
             DrawUI();
         }
-        private void UpdateSettings(object sender = null, ValueChangedEventArgs<bool> e = null) {
+        private void UpdateSettings(object sender = null, ValueChangedEventArgs<bool> e = null)
+        {
             DrawUI();
         }
         private void UpdateSettings(object sender = null, ValueChangedEventArgs<float> e = null)
@@ -298,18 +333,21 @@ namespace Manlaan.Mounts
             DrawUI();
         }
 
-        internal void DrawManualIcons() {
+        internal void DrawManualIcons()
+        {
             int curX = 0;
             int curY = 0;
             int totalMounts = 0;
 
-            _mountPanel = new Panel() {
+            _mountPanel = new Panel()
+            {
                 Parent = GameService.Graphics.SpriteScreen,
                 Location = _settingLoc.Value,
                 Size = new Point(_settingImgWidth.Value * 8, _settingImgWidth.Value * 8),
             };
 
-            foreach (Mount mount in _availableOrderedMounts) {
+            foreach (Mount mount in _availableOrderedMounts)
+            {
                 Texture2D img = _textureCache.GetImgFile(mount.ImageFileName);
                 Image _btnMount = new Image
                 {
@@ -330,33 +368,40 @@ namespace Manlaan.Mounts
                 totalMounts++;
             }
 
-            if (_settingDrag.Value) {
-                Panel dragBox = new Panel() {
+            if (_settingDrag.Value)
+            {
+                Panel dragBox = new Panel()
+                {
                     Parent = _mountPanel,
                     Location = new Point(0, 0),
                     Size = new Point(_settingImgWidth.Value / 2, _settingImgWidth.Value / 2),
                     BackgroundColor = Color.White,
                     ZIndex = 10,
                 };
-                dragBox.LeftMouseButtonPressed += delegate {
+                dragBox.LeftMouseButtonPressed += delegate
+                {
                     _dragging = true;
                     _dragStart = InputService.Input.Mouse.Position;
                 };
-                dragBox.LeftMouseButtonReleased += delegate {
+                dragBox.LeftMouseButtonReleased += delegate
+                {
                     _dragging = false;
                     _settingLoc.Value = _mountPanel.Location;
                 };
             }
 
-            if (_settingOrientation.Value.Equals("Horizontal")) {
+            if (_settingOrientation.Value.Equals("Horizontal"))
+            {
                 _mountPanel.Size = new Point(_settingImgWidth.Value * totalMounts, _settingImgWidth.Value);
             }
-            else {
+            else
+            {
                 _mountPanel.Size = new Point(_settingImgWidth.Value, _settingImgWidth.Value * totalMounts);
             }
 
         }
-        private void DrawCornerIcons() {
+        private void DrawCornerIcons()
+        {
             foreach (Mount mount in _availableOrderedMounts)
             {
                 mount.CreateCornerIcon(_textureCache.GetImgFile(mount.ImageFileName));
@@ -384,11 +429,19 @@ namespace Manlaan.Mounts
             _queueingSpinner.Hide();
 
             _radial?.Dispose();
-            _radial = new DrawRadial(_helper, _textureCache);
+            _radial = new DrawRadial(_helper, _textureCache, Mount.RadialCategoryEnum.Primary);
             _radial.Parent = GameService.Graphics.SpriteScreen;
+
+            _secondaryRadial?.Dispose();
+            _secondaryRadial = new DrawRadial(_helper, _textureCache, Mount.RadialCategoryEnum.Secondary);
+            _secondaryRadial.Parent = GameService.Graphics.SpriteScreen;
+
+            _tertiaryRadial?.Dispose();
+            _tertiaryRadial = new DrawRadial(_helper, _textureCache, Mount.RadialCategoryEnum.Tertiary);
+            _tertiaryRadial.Parent = GameService.Graphics.SpriteScreen;
         }
 
-        private async Task DoDefaultMountActionAsync()
+        private async Task DoDefaultMountActionAsync(Mount.RadialCategoryEnum radialCategory)
         {
             if (_helper.IsKeybindBeingTriggered())
             {
@@ -426,13 +479,26 @@ namespace Manlaan.Mounts
                     Logger.Debug("DoDefaultMountActionAsync DefaultMountBehaviour defaultmount");
                     break;
                 case "Radial":
-                    _radial.Show();
+                    switch (radialCategory)
+                    {
+                        case Mount.RadialCategoryEnum.Secondary:
+                            _secondaryRadial.Show();
+                            break;
+                        case Mount.RadialCategoryEnum.Tertiary:
+                            _tertiaryRadial.Show();
+                            break;
+                        default:
+                        case Mount.RadialCategoryEnum.Primary:
+                            _radial.Show();
+                            break;
+                    }
+                    
                     Logger.Debug("DoDefaultMountActionAsync DefaultMountBehaviour radial");
                     break;
             }
             return;
         }
-        
+
         private async Task HandleCombatChangeAsync(object sender, ValueEventArgs<bool> e)
         {
             if (!e.Value)

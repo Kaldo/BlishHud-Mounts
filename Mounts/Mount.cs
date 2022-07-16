@@ -12,7 +12,13 @@ namespace Manlaan.Mounts
 {
     public abstract class Mount
     {
-        private readonly Helper _helper;
+        protected readonly Helper _helper;
+
+        public enum RadialCategoryEnum {
+            Primary = 1,
+            Secondary = 2,
+            Tertiary = 3
+        }
 
         public Mount(SettingCollection settingCollection, Helper helper,
             string name, string displayName, string imageFileName,
@@ -25,6 +31,7 @@ namespace Manlaan.Mounts
             IsWaterMount = isUnderwaterMount;
             IsWvWMount = isWvWMount;
             OrderSetting = settingCollection.DefineSetting($"Mount{name}Order2", defaultOrderSetting, () => $"{displayName} Order", () => "");
+            RadialCategory = settingCollection.DefineSetting($"Mount{name}RadialCategoryBinding", (int)RadialCategoryEnum.Primary, () => $"{displayName} Binding", () => "");
             KeybindingSetting = settingCollection.DefineSetting($"Mount{name}Binding", new KeyBinding(Keys.None), () => $"{displayName} Binding", () => "");
         }
 
@@ -38,6 +45,7 @@ namespace Manlaan.Mounts
 
 
         public SettingEntry<int> OrderSetting { get; private set; }
+        public SettingEntry<int> RadialCategory { get; set; }
         public SettingEntry<KeyBinding> KeybindingSetting { get; private set; }
         public CornerIcon CornerIcon { get; private set; }
         public bool IsAvailable => OrderSetting.Value != 0 && IsKeybindSet;
@@ -48,7 +56,7 @@ namespace Manlaan.Mounts
             await _helper.TriggerKeybind(KeybindingSetting);
         }
 
-        public async Task DoMountAction()
+        public virtual async Task DoMountAction()
         {
             if (GameService.Gw2Mumble.PlayerCharacter.IsInCombat)
             {
@@ -145,4 +153,48 @@ namespace Manlaan.Mounts
         {
         }
     }
+
+    public class Skiff : Mount {
+        public Skiff(SettingCollection settingCollection, Helper helper) : base(settingCollection, helper, "Skiff", "Skiff", "turtle", false, false, 10)
+        {
+        }
+
+        public override Task DoMountAction()
+        {
+            return base.DoMountAction();
+
+            //if (GameService.Gw2Mumble.PlayerCharacter.IsInCombat)
+            //{
+            //    QueuedTimestamp = DateTime.UtcNow;
+            //    return;
+            //}
+
+            //if (GameService.Gw2Mumble.PlayerCharacter.CurrentMount == MountType.None)
+            //{
+            //    LastUsedTimestamp = DateTime.UtcNow;
+            //}
+
+            //await _helper.TriggerKeybind(KeybindingSetting);
+        }
+
+    }
+
+    public class FishingRod : Mount {
+        public FishingRod(SettingCollection settingCollection, Helper helper) : base(settingCollection, helper, "FishingRod", "Fishing Rod", "roller", false, false, 11)
+        {
+        }
+    }
+
+    public class PersonalWaypoint : Mount {
+        public PersonalWaypoint(SettingCollection settingCollection, Helper helper) : base(settingCollection, helper, "PersonalWaypoint", "Personal Waypoint", "warclaw", false, false, 12)
+        {
+        }
+    }
+
+    public class Chair : Mount {
+        public Chair(SettingCollection settingCollection, Helper helper) : base(settingCollection, helper, "Chair", "Chair", "raptor", false, false, 13)
+        {
+        }
+    }
+
 }
