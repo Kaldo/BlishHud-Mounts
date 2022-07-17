@@ -35,7 +35,7 @@ namespace Manlaan.Mounts {
         internal static List<Mount> _availableOrderedSecondaryMounts => _mounts.Where(m => m.IsAvailable && m.RadialCategory.Value == (int)Mount.RadialCategoryEnum.Secondary).OrderBy(m => m.OrderSetting.Value).ToList();
         internal static List<Mount> _availableOrderedTertiaryMounts => _mounts.Where(m => m.IsAvailable && m.RadialCategory.Value == (int)Mount.RadialCategoryEnum.Tertiary).OrderBy(m => m.OrderSetting.Value).ToList();
 
-        public static int[] _mountOrder = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+        public static int[] _mountOrder = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
         public static string[] _mountDisplay = new string[] { "Transparent", "Solid", "SolidText" };
         public static string[] _mountBehaviour = new string[] { "DefaultMount", "Radial" };
         public static string[] _mountOrientation = new string[] { "Horizontal", "Vertical" };
@@ -136,10 +136,14 @@ namespace Manlaan.Mounts {
                 new Warclaw(settings, _helper),
                 new Skyscale(settings, _helper),
                 new SiegeTurtle(settings, _helper),
-                new Skiff(settings, _helper),
                 new FishingRod(settings, _helper),
+                new Skiff(settings, _helper),
                 new PersonalWaypoint(settings, _helper),
-                new Chair(settings, _helper)
+                new Chair(settings, _helper),
+                new MusicalInstrument(settings, _helper),
+                new HeldItem(settings, _helper),
+                new Toy(settings, _helper),
+                new Tonic(settings, _helper)
             };
 
             _settingDefaultMountBinding = settings.DefineSetting("DefaultMountBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultMountBinding, () => "");
@@ -153,10 +157,6 @@ namespace Manlaan.Mounts {
             _settingDefaultTertiaryRadialBinding = settings.DefineSetting("DefaultTertiaryRadialBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultTertiaryRadialBinding, () => "");
             _settingDefaultTertiaryRadialBinding.Value.Enabled = true;
             _settingDefaultTertiaryRadialBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(Mount.RadialCategoryEnum.Tertiary); };
-
-            //_settingDefaultAlternativeBinding = settings.DefineSetting("DefaultAlternativeBinding", new KeyBinding(Keys.None), () => Strings.Setting_DefaultAlternativeBinding, () => "");
-            //_settingDefaultAlternativeBinding.Value.Enabled = true;
-            //_settingDefaultAlternativeBinding.Value.Activated += async delegate { await DoDefaultMountActionAsync(Mount.RadialCategoryEnum.Alternatives); };
 
             _settingDefaultMountChoice = settings.DefineSetting("DefaultMountChoice", "Disabled", () => Strings.Setting_DefaultMountChoice, () => "");
             _settingDefaultWaterMountChoice = settings.DefineSetting("DefaultWaterMountChoice", "Disabled", () => Strings.Setting_DefaultWaterMountChoice, () => "");

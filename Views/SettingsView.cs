@@ -62,7 +62,7 @@ namespace Manlaan.Mounts.Views
                 Parent = buildPanel,
                 HeightSizingMode = SizingMode.AutoSize,
                 Width = 420,
-                Location = new Point(10, 450)
+                Location = new Point(10, 520)
             };
             Panel radialPanel = new Panel()
             {
@@ -489,42 +489,6 @@ namespace Manlaan.Mounts.Views
             {
                 Module._settingDisplayMountQueueing.Value = settingDisplayMountQueueing_Checkbox.Checked;
             };
-
-            // Secondary radial keybind
-            Label settingDefaultSecondaryRadialKeybind_Label = new Label()
-            {
-                Location = new Point(0, settingDisplayMountQueueing_Label.Bottom + 6),
-                Width = labelWidth2,
-                AutoSizeHeight = false,
-                WrapText = false,
-                Parent = defaultMountPanel,
-                Text = "2nd radial key binding:",
-            };
-            KeybindingAssigner settingDefaultSecondaryRadial_Keybind = new KeybindingAssigner(Module._settingDefaultSecondaryRadialBinding.Value)
-            {
-                NameWidth = 0,
-                Size = new Point(mountsAndRadialInputWidth, 20),
-                Parent = defaultMountPanel,
-                Location = new Point(settingDefaultSecondaryRadialKeybind_Label.Right + 4, settingDefaultSecondaryRadialKeybind_Label.Top - 1),
-            };
-
-            // Tertiary radial keybind
-            Label settingDefaultTertiaryRadialKeybind_Label = new Label()
-            {
-                Location = new Point(0, settingDefaultSecondaryRadialKeybind_Label.Bottom + 6),
-                Width = labelWidth2,
-                AutoSizeHeight = false,
-                WrapText = false,
-                Parent = defaultMountPanel,
-                Text = "3rd radial key binding:",
-            };
-            KeybindingAssigner settingDefaultTertiaryRadial_Keybind = new KeybindingAssigner(Module._settingDefaultTertiaryRadialBinding.Value)
-            {
-                NameWidth = 0,
-                Size = new Point(mountsAndRadialInputWidth, 20),
-                Parent = defaultMountPanel,
-                Location = new Point(settingDefaultTertiaryRadialKeybind_Label.Right + 4, settingDefaultTertiaryRadialKeybind_Label.Top - 1),
-            };
         }
 
         private void BuildRadialPanel(Container radialPanel, int labelWidth, int mountsAndRadialInputWidth)
@@ -678,6 +642,8 @@ namespace Manlaan.Mounts.Views
             {
                 Module._settingMountRadialRemoveCenterMount.Value = settingMountRadialRemoveCenterMount_Checkbox.Checked;
             };
+
+            // Action camera key binding
             Label settingMountRadialToggleActionCameraKeyBinding_Label = new Label()
             {
                 Location = new Point(0, settingMountRadialRemoveCenterMount_Label.Bottom + 6),
@@ -700,6 +666,42 @@ namespace Manlaan.Mounts.Views
                 Size = new Point(mountsAndRadialInputWidth, 20),
                 Parent = radialPanel,
                 Location = new Point(settingMountRadialToggleActionCameraKeyBinding_Label.Right + 4, settingMountRadialToggleActionCameraKeyBinding_Label.Top - 1),
+            };
+
+            // Secondary radial keybind
+            Label settingDefaultSecondaryRadialKeybind_Label = new Label()
+            {
+                Location = new Point(0, settingMountRadialToggleActionCameraKeyBinding_Label.Bottom + 6),
+                Width = labelWidth,
+                AutoSizeHeight = false,
+                WrapText = false,
+                Parent = radialPanel,
+                Text = "2nd radial key binding:",
+            };
+            KeybindingAssigner settingDefaultSecondaryRadial_Keybind = new KeybindingAssigner(Module._settingDefaultSecondaryRadialBinding.Value)
+            {
+                NameWidth = 0,
+                Size = new Point(mountsAndRadialInputWidth, 20),
+                Parent = radialPanel,
+                Location = new Point(settingDefaultSecondaryRadialKeybind_Label.Right + 4, settingDefaultSecondaryRadialKeybind_Label.Top - 1),
+            };
+
+            // Tertiary radial keybind
+            Label settingDefaultTertiaryRadialKeybind_Label = new Label()
+            {
+                Location = new Point(0, settingDefaultSecondaryRadialKeybind_Label.Bottom + 6),
+                Width = labelWidth,
+                AutoSizeHeight = false,
+                WrapText = false,
+                Parent = radialPanel,
+                Text = "3rd radial key binding:",
+            };
+            KeybindingAssigner settingDefaultTertiaryRadial_Keybind = new KeybindingAssigner(Module._settingDefaultTertiaryRadialBinding.Value)
+            {
+                NameWidth = 0,
+                Size = new Point(mountsAndRadialInputWidth, 20),
+                Parent = radialPanel,
+                Location = new Point(settingDefaultTertiaryRadialKeybind_Label.Right + 4, settingDefaultTertiaryRadialKeybind_Label.Top - 1),
             };
         }
 
